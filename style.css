@@ -1,5 +1,6 @@
 /* Variáveis de Cor e Configurações Globais */
 :root {
+    color-scheme: light dark;
     /* Tema Claro (Padrão) */
     --primary-color: #007bff;
     --primary-color-dark: #0056b3;
@@ -40,6 +41,10 @@
     --highlight-shadow-color: rgba(62, 173, 255, 0.4);
 }
 
+/* Define a ordem explícita das camadas da cascata, da menor para a maior prioridade. */
+@layer reset, layout, components;
+
+@layer reset {
 /* Reset de Box Model para um layout mais previsível */
 *,
 *::before,
@@ -56,6 +61,21 @@ body {
     color: var(--text-color);
 }
 
+/*
+  Acessibilidade: Respeita a preferência do usuário por movimento reduzido.
+  Desativa animações e transições para uma experiência mais segura.
+*/
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+}
+
+@layer layout {
 /* Cabeçalho */
 .main-header {
     background-color: var(--surface-color);
@@ -88,25 +108,6 @@ body {
     font-size: clamp(1.75rem, 1.25rem + 2vw, 2.5rem);
 }
 
-.back-link {
-    text-align: start;
-    margin: 0;
-}
-
-.back-link a {
-    color: var(--primary-color);
-    text-decoration: none;
-    font-weight: 500;
-}
-
-/* Melhoria de Acessibilidade: Estilo de Foco */
-.back-link a:focus-visible,
-.button:focus-visible,
-#theme-toggle:focus-visible {
-    box-shadow: 0 0 0 3px var(--focus-ring-color);
-    outline: none;
-}
-
 /* Conteúdo Principal */
 .main-container {
     max-width: 1600px;
@@ -119,6 +120,24 @@ body {
     /* Cria colunas responsivas que se ajustam automaticamente */
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 2rem;
+}
+
+/* Rodapé */
+.main-footer {
+    text-align: center;
+    padding: 2rem;
+    margin-block-start: 2rem;
+    background-color: var(--surface-color);
+    color: var(--text-color-muted);
+    font-size: 0.9rem;
+}
+}
+
+@layer components {
+/* Melhoria de Acessibilidade: Estilo de Foco unificado */
+:is(.back-link a, .button, #theme-toggle):focus-visible {
+    box-shadow: 0 0 0 3px var(--focus-ring-color);
+    outline: none;
 }
 
 .button-column {
@@ -152,6 +171,17 @@ body {
     transform: translateY(0);
 }
 
+.back-link {
+    text-align: start;
+    margin: 0;
+}
+
+.back-link a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
 /* Estilos dos Botões de Cardápio */
 .button {
     display: block;
@@ -161,13 +191,13 @@ body {
     border-radius: 8px;
     text-align: center;
     font-weight: 500;
-    transition: background-color 0.2s ease, transform 0.2s ease;
+    transition: background-color 0.2s, transform 0.2s, filter 0.2s;
     border: 1px solid transparent;
-}
 
-.button:hover {
-    transform: translateY(-2px);
-    filter: brightness(1.1);
+    &:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.1);
+    }
 }
 
 /* Cores específicas dos botões */
@@ -190,42 +220,31 @@ body {
   box-shadow: 0 0 12px var(--highlight-shadow-color);
   transform: scale(1.02);
   background-color: var(--highlight-background-color);
+
+  .column-title::before {
+    content: '🗓️ ';
+    margin-inline-end: 8px;
+  }
 }
 
 .past-week {
   opacity: 0.65;
   filter: grayscale(80%);
-}
 
-.past-week:hover {
-  opacity: 1;
-  filter: grayscale(0%);
-}
+  &:hover {
+    opacity: 1;
+    filter: grayscale(0%);
+  }
 
-/* Adiciona um ícone na semana atual */
-.current-week .column-title::before {
-    content: '🗓️ ';
-    margin-inline-end: 8px;
-}
-
-.past-week .column-title::before {
+  .column-title::before {
     content: '✅ ';
     margin-inline-end: 5px;
-}
-
-/* Rodapé */
-.main-footer {
-    text-align: center;
-    padding: 2rem;
-    margin-block-start: 2rem;
-    background-color: var(--surface-color);
-    color: var(--text-color-muted);
-    font-size: 0.9rem;
+  }
 }
 
 /* Botão "Voltar ao Topo" */
 #back-to-top {
-  display: none;
+  display: none; /* Alterado para 'flex' via JS na classe .show */
   position: fixed;
   inset-block-end: 20px;
   inset-inline-end: 30px;
@@ -243,14 +262,34 @@ body {
   transition: opacity 0.3s, visibility 0.3s;
   align-items: center;
   justify-content: center;
+
+  &:hover {
+    background-color: var(--primary-color-dark);
+  }
+
+  &.show {
+    display: flex;
+  }
 }
 
-#back-to-top:hover {
-  background-color: var(--primary-color-dark);
-}
+/* Estilos do Seletor de Tema */
+#theme-toggle {
+    background: none;
+    border: 1px solid var(--medium-gray);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.2s, border-color 0.2s, transform 0.2s;
 
-#back-to-top.show {
-  display: flex;
+    &:hover {
+        background-color: var(--background-color);
+    }
+}
 }
 
 /* Media Queries para Responsividade */
@@ -270,23 +309,4 @@ body {
         height: 45px;
         font-size: 20px;
     }
-}
-
-/* Estilos do Seletor de Tema */
-#theme-toggle {
-    background: none;
-    border: 1px solid var(--medium-gray);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    cursor: pointer;
-    font-size: 1.2rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background-color 0.2s, border-color 0.2s;
-}
-
-#theme-toggle:hover {
-    background-color: var(--background-color);
 }
